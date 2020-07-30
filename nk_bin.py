@@ -4,7 +4,7 @@ import binascii
 import struct
 import sys
 import time
-from typing import BinaryIO, Optional
+from typing import BinaryIO, List, Optional
 
 ROMHDR_PTR_FMT = '<I'
 PTOC_FMT = '<I'
@@ -30,7 +30,7 @@ class B000FF:
 
         self._file.seek(struct.calcsize(self.HEADER_FMT))
 
-    def add_entry(self, addr: int, data: bytes):
+    def add_entry(self, addr: int, data: bytes) -> None:
         assert addr >= self._end_addr
 
         if addr < self._start_addr:
@@ -42,10 +42,10 @@ class B000FF:
             self.ENTRY_FMT, addr, len(data), sum(data)))
         self._file.write(data)
 
-    def set_exec_address(self, addr):
+    def set_exec_address(self, addr: int) -> None:
         self._exec_addr = addr
 
-    def finalize(self):
+    def finalize(self) -> None:
         # Write execution start record
         self._file.write(struct.pack(
             self.ENTRY_FMT, 0, self._exec_addr, 0))
@@ -88,33 +88,33 @@ class TOC:
     HEADER_SIZE = struct.calcsize(ROMHDR_FMT)
 
     def __init__(self,
-                 phys_first,
+                 phys_first: int,
                  # Set correctly once known
-                 phys_last=0x0,
+                 phys_last: int = 0x0,
                  # These probably don't matter much unless you are actually
                  # booting WinCE. I just took the values from the original
                  # NK.bin
-                 dll_first=0x1EE01EE,
-                 dll_last=0x2000000,
-                 ram_start=0x88E80000,
-                 ram_free=0x88EEA000,
-                 ram_end=0x8C000000,
-                 copy_entries=0x0,
-                 copy_offset=0x0,
-                 profile_len=0x0,
-                 profile_offset=0x0,
-                 kernel_flags=0x2,
-                 fs_ram_percent=0x03030303,
-                 driv_glob_start=0x0,
-                 driv_glob_len=0x0,
-                 cpu_type=0x1C2,
-                 misc_flags=0x2,
-                 extensions_ptr=0x88202f60,  # invalid
-                 tracking_start=0x0,
-                 tracking_len=0x0
-                 ):
+                 dll_first: int = 0x1EE01EE,
+                 dll_last: int = 0x2000000,
+                 ram_start: int = 0x88E80000,
+                 ram_free: int = 0x88EEA000,
+                 ram_end: int = 0x8C000000,
+                 copy_entries: int = 0x0,
+                 copy_offset: int = 0x0,
+                 profile_len: int = 0x0,
+                 profile_offset: int = 0x0,
+                 kernel_flags: int = 0x2,
+                 fs_ram_percent: int = 0x03030303,
+                 driv_glob_start: int = 0x0,
+                 driv_glob_len: int = 0x0,
+                 cpu_type: int = 0x1C2,
+                 misc_flags: int = 0x2,
+                 extensions_ptr: int = 0x88202f60,  # invalid
+                 tracking_start: int = 0x0,
+                 tracking_len: int = 0x0
+                 ) -> None:
 
-        # Make sure I got the right number of 
+        # Make sure I got the right number of
         assert self.HEADER_SIZE == 84
 
         self.dll_first = dll_first
@@ -140,9 +140,9 @@ class TOC:
         self.tracking_start = tracking_start
         self.tracking_len = tracking_len
 
-        self._entries = []
+        self._entries: List[TOCEntry] = []
 
-    def add_entry(self, entry):
+    def add_entry(self, entry: TOCEntry) -> None:
         self._entries.append(entry)
 
         self.num_mods += 1
@@ -150,7 +150,7 @@ class TOC:
         self.num_files += 1
 
     @property
-    def data(self):
+    def data(self) -> bytearray:
         buf = bytearray(struct.pack(
             self.ROMHDR_FMT,
             self.dll_first,
@@ -181,11 +181,11 @@ class TOC:
         return buf
 
     @property
-    def size(self):
+    def size(self) -> int:
         return self.HEADER_SIZE + len(self._entries) * TOCEntry.SIZE
 
 
-def main():
+def main() -> None:
     exe_path = sys.argv[1]
     with open(exe_path, 'rb') as exe_file:
         exe_buf = exe_file.read()
