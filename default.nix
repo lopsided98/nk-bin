@@ -1,4 +1,4 @@
-{ lib, nixShell ? false, buildPythonApplication, mypy, autopep8, pylint, rope }:
+{ lib, nixShell ? false, buildPythonApplication, mypy, black, pylint, rope }:
 
 buildPythonApplication {
   pname = "nk-bin";
@@ -16,7 +16,7 @@ buildPythonApplication {
   };
 
   # Devlopment dependencies
-  nativeBuildInputs = lib.optionals nixShell [ mypy autopep8 pylint rope ];
+  nativeBuildInputs = lib.optionals nixShell [ mypy black pylint rope ];
 
   meta = with lib; {
     description = "Generate WinCE boot images to run custom code";

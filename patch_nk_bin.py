@@ -20,10 +20,10 @@ def unpack(stream: BinaryIO, fmt: str) -> Tuple[Any, ...]:
 
 
 def main() -> None:
-    with open(sys.argv[1], 'rb') as new_exe_file:
+    with open(sys.argv[1], "rb") as new_exe_file:
         new_exe_buf = new_exe_file.read()
 
-    file = open('NK.bin', 'rb+')
+    file = open("NK.bin", "rb+")
 
     magic, _, _ = unpack(file, B000FF_HEADER_FMT)
 
@@ -42,7 +42,7 @@ def main() -> None:
     assert len(new_exe_buf) <= length
 
     exe_buf = bytearray(file.read(length))
-    exe_buf[OFFSET:len(new_exe_buf) + OFFSET] = new_exe_buf
+    exe_buf[OFFSET : len(new_exe_buf) + OFFSET] = new_exe_buf
 
     checksum = sum(exe_buf)
 
