@@ -1,8 +1,9 @@
-{ lib, nixShell ? false, buildPythonApplication, mypy, pymavlink
-, influxdb, autopep8, pylint, rope }:
+{ lib, nixShell ? false, buildPythonApplication, mypy, autopep8, pylint, rope }:
 
 buildPythonApplication {
-  name = "nk-bin";
+  pname = "nk-bin";
+  version = "0.1.1";
+  format = "setuptools";
 
   # lib.inNixShell can't be used here because it will return a false positive
   # if this package is pulled into a shell
@@ -14,13 +15,12 @@ buildPythonApplication {
     src = lib.cleanSource ./.;
   };
 
-  nativeBuildInputs = [ mypy ];
   # Devlopment dependencies
-  buildInputs = lib.optionals nixShell [ autopep8 pylint rope ];
+  nativeBuildInputs = lib.optionals nixShell [ mypy autopep8 pylint rope ];
 
   meta = with lib; {
     description = "Generate WinCE boot images to run custom code";
-    license = licenses.mit;
+    license = licenses.gpl3Plus;
     maintainers = with maintainers; [ lopsided98 ];
   };
 }
